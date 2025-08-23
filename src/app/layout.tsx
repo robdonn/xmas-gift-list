@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/context/AuthContext';
 import { AppStateProvider } from '@/context/AppStateContext';
+import { PWAPrompt, OfflineIndicator } from '@/components/PWAPrompt';
 import './globals.css';
 
 const inter = Inter({
@@ -20,6 +21,17 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'XmasGifts',
   },
+  icons: {
+    icon: '/icons/icon-192x192.png',
+    apple: '/icons/icon-192x192.png',
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
+  },
 };
 
 export default function RootLayout({
@@ -36,10 +48,26 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="XmasGifts" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="192x192"
+          href="/icons/icon-192x192.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="512x512"
+          href="/icons/icon-512x512.png"
+        />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-gray-50`}>
         <AuthProvider>
-          <AppStateProvider>{children}</AppStateProvider>
+          <AppStateProvider>
+            <OfflineIndicator />
+            {children}
+            <PWAPrompt />
+          </AppStateProvider>
         </AuthProvider>
       </body>
     </html>

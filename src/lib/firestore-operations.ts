@@ -115,12 +115,19 @@ export class GiftListService {
 }
 
 // Gift Items CRUD operations
-export class GiftItemService {
-  static async createItem(
-    data: Omit<GiftItem, 'id' | 'createdAt' | 'updatedAt'>
+export class ItemService {
+  static async create(
+    listId: string,
+    data: Omit<
+      GiftItem,
+      'id' | 'listId' | 'createdAt' | 'updatedAt' | 'isPurchased' | 'createdBy'
+    >
   ): Promise<GiftItem> {
     const docRef = await addDoc(collection(db, 'giftItems'), {
       ...data,
+      listId,
+      isPurchased: false,
+      createdBy: '', // Will be set by the caller
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -135,7 +142,7 @@ export class GiftItemService {
     } as GiftItem;
   }
 
-  static async updateItem(id: string, data: Partial<GiftItem>): Promise<void> {
+  static async update(id: string, data: Partial<GiftItem>): Promise<void> {
     const docRef = doc(db, 'giftItems', id);
     await updateDoc(docRef, {
       ...data,
@@ -143,7 +150,7 @@ export class GiftItemService {
     });
   }
 
-  static async deleteItem(id: string): Promise<void> {
+  static async delete(id: string): Promise<void> {
     await deleteDoc(doc(db, 'giftItems', id));
   }
 

@@ -71,7 +71,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-christmas-red focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-christmas-red focus:border-transparent text-gray-900 placeholder-gray-500"
               placeholder="Enter your email"
               required
               disabled={loading}
