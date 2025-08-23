@@ -1,11 +1,14 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { UserProfile } from '@/components/auth/UserProfile';
 import { useAppState } from '@/context/AppStateContext';
 
 export default function DashboardPage() {
+  const router = useRouter();
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
@@ -41,6 +44,7 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const { groups } = useAppState();
+  const router = useRouter();
 
   return (
     <div className="space-y-8">
@@ -121,7 +125,10 @@ function DashboardContent() {
                 Create your first gift group to start organizing your Christmas
                 lists
               </p>
-              <button className="bg-christmas-red text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors">
+              <button
+                className="bg-christmas-red text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                onClick={() => router.push('/groups')}
+              >
                 Create Your First Group
               </button>
             </div>
@@ -151,8 +158,11 @@ function DashboardContent() {
                     </div>
                   </div>
                   <div className="mt-4">
-                    <button className="w-full bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-200 transition-colors">
-                      View Group
+                    <button
+                      className="w-full bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-200 transition-colors"
+                      onClick={() => router.push('/groups')}
+                    >
+                      View Groups
                     </button>
                   </div>
                 </div>
