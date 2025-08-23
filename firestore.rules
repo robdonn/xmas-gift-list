@@ -1,0 +1,71 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own user document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Gift Groups: users can read groups they're members of, create new groups, and update groups they own
+    match /giftGroups/{groupId} {
+      allow read: if request.auth != null && 
+        request.auth.uid in resource.data.memberIds;
+      
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.ownerId &&
+        request.auth.uid in request.resource.data.memberIds;
+      
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.ownerId ||
+        (request.auth.uid in resource.data.memberIds && 
+         request.resource.data.keys().hasOnly(['memberIds', 'updatedAt']))
+      );
+      
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.ownerId;
+    }
+
+    // Gift Lists: users can read lists in groups they're members of, create lists, and update lists they created or collaborate on
+    match /giftLists/{listId} {
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/giftGroups/$(resource.data.groupId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/giftGroups/$(resource.data.groupId)).data.memberIds;
+      
+      allow create: if request.auth != null && 
+        exists(/databases/$(database)/documents/giftGroups/$(request.resource.data.groupId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/giftGroups/$(request.resource.data.groupId)).data.memberIds &&
+        request.auth.uid == request.resource.data.createdBy;
+      
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.createdBy ||
+        request.auth.uid in resource.data.collaboratorIds
+      );
+      
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.createdBy;
+    }
+
+    // Gift Items: users can read items in lists they have access to, and modify items in lists they collaborate on
+    match /giftItems/{itemId} {
+      allow read: if request.auth != null && 
+        exists(/databases/$(database)/documents/giftLists/$(resource.data.listId)) &&
+        (request.auth.uid == get(/databases/$(database)/documents/giftLists/$(resource.data.listId)).data.createdBy ||
+         request.auth.uid in get(/databases/$(database)/documents/giftLists/$(resource.data.listId)).data.collaboratorIds);
+      
+      allow create: if request.auth != null && 
+        exists(/databases/$(database)/documents/giftLists/$(request.resource.data.listId)) &&
+        (request.auth.uid == get(/databases/$(database)/documents/giftLists/$(request.resource.data.listId)).data.createdBy ||
+         request.auth.uid in get(/databases/$(database)/documents/giftLists/$(request.resource.data.listId)).data.collaboratorIds) &&
+        request.auth.uid == request.resource.data.createdBy;
+      
+      allow update: if request.auth != null && 
+        exists(/databases/$(database)/documents/giftLists/$(resource.data.listId)) &&
+        (request.auth.uid == get(/databases/$(database)/documents/giftLists/$(resource.data.listId)).data.createdBy ||
+         request.auth.uid in get(/databases/$(database)/documents/giftLists/$(resource.data.listId)).data.collaboratorIds);
+      
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.createdBy;
+    }
+  }
+}
